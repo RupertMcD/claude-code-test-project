@@ -42,6 +42,33 @@ model Account {
   updatedAt       DateTime      @updatedAt
 }
 
+// A manually-tracked account for providers not on open banking
+// (e.g. St. James's Place, Moneybox). The user updates the balance by hand.
+model ManualAccount {
+  id        String   @id @default(cuid())
+  name      String
+  kind      String   @default("ASSET") // ASSET or LIABILITY
+  provider  String?
+  balance   Float
+  currency  String   @default("GBP")
+  asOf      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A daily point-in-time record of net worth, so the app can show a trend.
+model NetWorthSnapshot {
+  id          String   @id @default(cuid())
+  day         String // YYYY-MM-DD
+  currency    String   @default("GBP")
+  assets      Float
+  liabilities Float
+  net         Float
+  createdAt   DateTime @default(now())
+
+  @@unique([day, currency])
+}
+
 // A single transaction on an account.
 model Transaction {
   id             String    @id @default(cuid())
