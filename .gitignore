@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Env / secrets — NEVER commit the Enable Banking private key or .env
+.env
+**/.env
+!.env.example
+*.pem
+*.key
+
+# Prisma / SQLite — never commit the database (contains your financial data)
+*.db
+*.db-journal
+*.sqlite
+
+# Build output
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Expo (added in Phase 1)
+.expo/
+**/.expo/
+web-build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store

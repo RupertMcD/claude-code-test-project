@@ -1,0 +1,64 @@
+// Prisma schema for the household finance backend.
+// Dev uses SQLite; can be swapped to Postgres later by changing the datasource.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A linked Enable Banking session (one per bank authorization).
+model BankSession {
+  id           String    @id @default(cuid())
+  ebSessionId  String    @unique
+  aspspName    String
+  aspspCountry String
+  status       String    @default("AUTHORIZED")
+  validUntil   DateTime?
+  createdAt    DateTime  @default(now())
+  accounts     Account[]
+}
+
+// A bank account exposed by a session.
+model Account {
+  id              String        @id @default(cuid())
+  uid             String        @unique // Enable Banking account uid
+  name            String?
+  product         String?
+  cashAccountType String? // e.g. CACC (current), CARD, LOAN, SVGS
+  currency        String?
+  iban            String?
+  balanceAmount   Float?
+  balanceCurrency String?
+  balanceType     String?
+  balanceUpdatedAt DateTime?
+  sessionId       String
+  session         BankSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// A single transaction on an account.
+model Transaction {
+  id             String    @id @default(cuid())
+  entryReference String?
+  amount         Float
+  currency       String
+  creditDebit    String? // CRDT or DBIT
+  status         String? // BOOK or PDNG
+  bookingDate    DateTime?
+  valueDate      DateTime?
+  description    String?
+  merchant       String?
+  category       String?
+  raw            String? // original JSON payload
+  accountId      String
+  account        Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+
+  @@unique([accountId, entryReference])
+}
