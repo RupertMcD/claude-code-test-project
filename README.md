@@ -9,16 +9,16 @@ explicit consent.
 - **Privacy policy:** https://rupertmcd.github.io/claude-code-test-project/
 - **Terms of use:** https://rupertmcd.github.io/claude-code-test-project/terms.html
 
-> **Status:** Phase 0 — backend + Enable Banking integration. The Expo mobile
-> app (accounts, net worth, budgets, bills) is built on top of this in later
-> phases. See the implementation plan for the full roadmap.
+> **Status:** Phase 1 — backend + Enable Banking integration, plus an Expo app
+> (runs on **web and iOS/Android**) showing net worth, connected + manual
+> accounts, and a bank-connect flow. Budgets and bills come in later phases.
 
 ## Repository layout
 
 ```
 server/     Node + Fastify + Prisma backend (Enable Banking integration)
 docs/       Privacy policy + terms (served via GitHub Pages)
-app/        Expo mobile app (added in Phase 1)
+app/        Expo app — web + iOS/Android (net worth, accounts, connect a bank)
 ```
 
 ## How the bank connection works
@@ -106,6 +106,48 @@ curl http://localhost:8000/net-worth
 | `GET /net-worth` | Assets − liabilities, grouped by currency. |
 | `POST /accounts/:uid/sync` | Fetch + store transactions (`?date_from=YYYY-MM-DD`). |
 | `GET /accounts/:uid/transactions` | Stored transactions for an account. |
+
+## The app (`app/`)
+
+An [Expo](https://expo.dev/) (React Native) app that runs both in a **web
+browser** and on **iOS/Android**. It talks only to the backend above.
+
+### Run it in a browser (easiest first look)
+
+```bash
+# 1) In one terminal, start the backend (see above)
+cd server && npm run dev
+
+# 2) In another terminal, start the app for web
+cd app
+npm install
+npm run web
+```
+
+This opens the dashboard in your browser at `http://localhost:8081`, talking to
+the backend on `http://localhost:8000`. Add a manual account (e.g. SJP) and it
+shows up in net worth straight away.
+
+### Run it on your phone (for Face ID bank linking)
+
+Your phone can't reach `localhost` on your Mac, so point the app at your
+backend's public tunnel URL (see the tunnel note above):
+
+```bash
+cd app
+EXPO_PUBLIC_API_URL=https://your-subdomain.trycloudflare.com npm start
+```
+
+Then scan the QR code with the **Expo Go** app on your phone. Tap **Connect a
+bank**, pick your bank, and approve with Face ID.
+
+### Screens
+
+- **Net worth** — total (assets − liabilities), a trend that grows as daily
+  snapshots accumulate, and every account (connected + manual).
+- **Connect a bank** — searchable list of UK banks from Enable Banking; opens
+  the bank's approval flow.
+- **Add manual account** — for providers not on open banking (SJP, Moneybox).
 
 ## Security notes
 
